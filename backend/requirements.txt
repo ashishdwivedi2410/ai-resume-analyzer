@@ -1,4 +1,3 @@
-uirements · TXT
 fastapi==0.111.0
 uvicorn[standard]==0.29.0
 python-multipart==0.0.9
@@ -21,5 +20,3 @@ python-dotenv==1.0.1
 httpx==0.27.0
 aiofiles==23.2.1
 loguru==0.7.2
- 
- 

@@ -1,6 +1,22 @@
+<div align="center">
 # 🤖 AI Resume Analyzer
  
-A full-stack AI-powered Resume Analyzer that evaluates resumes against job descriptions using Claude AI, embedding-based similarity scoring, and intelligent feedback generation.
+**Full-stack AI-powered resume evaluation system**  
+*Built with FastAPI · React · Claude AI · PostgreSQL · Redis*
+ 
+[![CI Pipeline](https://github.com/YOUR_USERNAME/ai-resume-analyzer/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/ai-resume-analyzer/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
+[![Node 20+](https://img.shields.io/badge/Node-20+-green.svg)](https://nodejs.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688.svg)](https://fastapi.tiangolo.com)
+[![React](https://img.shields.io/badge/React-18-61DAFB.svg)](https://react.dev)
+ 
+</div>
+---
+ 
+## 📸 Overview
+ 
+AI Resume Analyzer evaluates resumes against job descriptions using a hybrid of **embedding-based similarity scoring** and **Claude LLM analysis**, generating ranked candidates with detailed section-wise scores and actionable feedback.
  
 ---
  
@@ -8,28 +24,39 @@ A full-stack AI-powered Resume Analyzer that evaluates resumes against job descr
  
 | Feature | Details |
 |--------|---------|
-| 📄 Resume Parsing | PDF and DOCX support via PyMuPDF + python-docx |
+| 📄 Resume Parsing | PDF and DOCX via PyMuPDF + python-docx |
 | 🧠 AI Extraction | Claude extracts Name, Email, Skills, Experience, Education |
-| 📊 Section Scoring | Skills (40%), Experience (35%), Education (25%) |
-| 🔀 Hybrid Scoring | Embedding cosine similarity + Claude LLM scoring |
-| 🏆 Ranking | Multi-resume batch analysis with ranked leaderboard |
-| 💡 Feedback | Strengths & actionable improvement suggestions |
-| 🔐 Auth | JWT access + refresh tokens |
-| ⚡ Caching | Redis cache (keyed by SHA-256 of resume+JD) |
+| 📊 Section Scoring | Skills (40%) · Experience (35%) · Education (25%) |
+| 🔀 Hybrid Scoring | Embedding cosine similarity + Claude LLM (weighted) |
+| 🏆 Ranking | Batch analysis with ranked leaderboard + podium |
+| 💡 Feedback | Per-candidate strengths & actionable improvements |
+| ⚡ Caching | Redis cache keyed by SHA-256(resume + JD) |
+| 🔐 Auth | JWT access + refresh tokens with bcrypt |
 | 🔍 RAG (Bonus) | ChromaDB vector store for retrieval-augmented scoring |
+| 📜 History | Searchable, filterable all-time analysis log |
  
 ---
  
-## 🏗️ Tech Stack
+## 🏗️ Architecture
  
-- **Backend**: FastAPI (Python 3.11)
-- **AI**: Anthropic Claude (`claude-sonnet-4-20250514`)
-- **Embeddings**: `sentence-transformers` (all-MiniLM-L6-v2)
-- **Database**: PostgreSQL + SQLAlchemy
-- **Cache**: Redis
-- **Vector DB**: ChromaDB (bonus RAG)
-- **Auth**: JWT (python-jose + passlib bcrypt)
-- **Parsing**: PyMuPDF (PDF), python-docx (DOCX)
+```
+┌─────────────────────────────────────────────┐
+│           React Frontend (Port 3000)        │
+│  Auth · Dashboard · Rankings · History      │
+└──────────────────┬──────────────────────────┘
+                   │ REST API (JWT)
+┌──────────────────▼──────────────────────────┐
+│          FastAPI Backend (Port 8000)        │
+│  /auth  /resume  /analyze                  │
+└──────┬──────────┬───────────┬───────────────┘
+       │          │           │
+  ┌────▼───┐ ┌───▼────┐ ┌────▼──────────────┐
+  │Postgres│ │ Redis  │ │  Claude API        │
+  │(Users  │ │(Cache) │ │  + Embeddings      │
+  │Results)│ │        │ │  + ChromaDB (RAG)  │
+  └────────┘ └────────┘ └───────────────────┘
+```
+ 
 ---
  
 ## 🚀 Quick Start
@@ -37,154 +64,92 @@ A full-stack AI-powered Resume Analyzer that evaluates resumes against job descr
 ### Option 1 — Docker (Recommended)
  
 ```bash
-# 1. Clone
-git clone https://github.com/your-username/ai-resume-analyzer.git
+git clone https://github.com/YOUR_USERNAME/ai-resume-analyzer.git
 cd ai-resume-analyzer
  
-# 2. Configure environment
+# Configure environment
 cp backend/.env.example backend/.env
-# Edit backend/.env — set ANTHROPIC_API_KEY and SECRET_KEY
+# ✏️  Edit backend/.env  — set ANTHROPIC_API_KEY and SECRET_KEY
  
-# 3. Start all services
-docker-compose up --build
+# Start all 4 services
+docker compose up --build
  
-# API runs at: http://localhost:8000
-# Docs at:     http://localhost:8000/docs
+# ✅ API     → http://localhost:8000
+# ✅ Docs    → http://localhost:8000/docs
+# ✅ Frontend→ http://localhost:3000
 ```
  
 ### Option 2 — Local Development
  
-**Prerequisites**: Python 3.11+, PostgreSQL, Redis
+**Prerequisites:** Python 3.11+, Node 20+, PostgreSQL 15+, Redis 7+
  
 ```bash
+# ── Backend ───────────────────────────────────
 cd backend
- 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
- 
-# Install dependencies
+python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
+cp .env.example .env        # Edit: set ANTHROPIC_API_KEY, DATABASE_URL, SECRET_KEY
+uvicorn main:app --reload   # → http://localhost:8000
  
-# Configure environment
-cp .env.example .env
-# Edit .env and set your values
- 
-# Run the API
-uvicorn main:app --reload --port 8000
+# ── Frontend (new terminal) ───────────────────
+cd frontend
+npm install
+cp .env.example .env        # VITE_API_URL=http://localhost:8000
+npm run dev                 # → http://localhost:3000
 ```
  
 ---
  
 ## ⚙️ Environment Variables
  
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `ANTHROPIC_API_KEY` | Your Anthropic API key | ✅ Yes |
-| `SECRET_KEY` | JWT signing secret (32+ chars) | ✅ Yes |
-| `DATABASE_URL` | PostgreSQL connection string | ✅ Yes |
-| `REDIS_URL` | Redis connection string | Optional (caching disabled if missing) |
-| `CLAUDE_MODEL` | Claude model name | Defaults to `claude-sonnet-4-20250514` |
-| `MAX_FILE_SIZE_MB` | Max resume upload size | Defaults to `10` |
+**`backend/.env`**
+ 
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `ANTHROPIC_API_KEY` | ✅ | Your Anthropic API key |
+| `SECRET_KEY` | ✅ | JWT signing secret (32+ chars) |
+| `DATABASE_URL` | ✅ | `postgresql://user:pass@host:5432/db` |
+| `REDIS_URL` | Optional | `redis://localhost:6379/0` (caching disabled if absent) |
+| `CLAUDE_MODEL` | Optional | Default: `claude-sonnet-4-20250514` |
+| `MAX_FILE_SIZE_MB` | Optional | Default: `10` |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | Optional | Default: `60` |
  
 ---
  
 ## 📡 API Reference
  
+Interactive docs available at **`/docs`** (Swagger UI) and **`/redoc`**.
+ 
 ### Authentication
- 
 ```
-POST /auth/register     → Register new user
-POST /auth/login        → Login → JWT tokens
-POST /auth/refresh      → Refresh access token
+POST  /auth/register    Register new account
+POST  /auth/login       Login → JWT tokens
+POST  /auth/refresh     Refresh access token
+GET   /auth/me          Get current user
 ```
  
-### Resume Management
- 
+### Resumes
 ```
-POST   /resume/upload         → Upload single resume (PDF/DOCX)
-POST   /resume/upload/batch   → Upload up to 10 resumes
-GET    /resume/               → List user's resumes
-GET    /resume/{id}           → Get specific resume
-DELETE /resume/{id}           → Delete resume
+POST   /resume/upload         Upload single resume (PDF/DOCX)
+POST   /resume/upload/batch   Upload up to 10 resumes
+GET    /resume/               List all user resumes
+GET    /resume/{id}           Get specific resume
+DELETE /resume/{id}           Delete resume
 ```
  
 ### Analysis
- 
 ```
-POST /analyze/single          → Analyze 1 resume vs JD
-POST /analyze/batch           → Analyze + rank multiple resumes
-GET  /analyze/results/{id}    → Get cached result
-GET  /analyze/rankings        → All results sorted by score
-```
- 
----
- 
-## 🧪 Sample Input / Output
- 
-### Register
-```json
-POST /auth/register
-{
-  "email": "recruiter@company.com",
-  "full_name": "Jane Smith",
-  "password": "SecurePass123!"
-}
+POST  /analyze/single         Analyze 1 resume vs job description
+POST  /analyze/batch          Analyze + rank multiple resumes
+GET   /analyze/results/{id}   Get cached result
+GET   /analyze/rankings       All results sorted by score
+DELETE /analyze/results/{id}  Delete a result
 ```
  
-### Analyze Single Resume
-```json
-POST /analyze/single
-Authorization: Bearer <token>
-{
-  "resume_id": 1,
-  "jd_text": "We are looking for a Senior Python Developer with 5+ years FastAPI, PostgreSQL, AWS, Docker experience..."
-}
+### Health
 ```
- 
-### Sample Output
-```json
-{
-  "id": 42,
-  "resume_id": 1,
-  "candidate_name": "John Doe",
-  "resume_filename": "john_doe_resume.pdf",
-  "skills_score": 85.4,
-  "experience_score": 72.1,
-  "education_score": 68.0,
-  "total_score": 76.8,
-  "strengths": [
-    "Strong Python expertise (5 years) directly matches the JD requirement",
-    "FastAPI and PostgreSQL experience aligns with backend stack",
-    "Docker experience covers containerization requirement"
-  ],
-  "improvements": [
-    "Add AWS certification or project experience — JD specifically requires cloud skills",
-    "Highlight any CI/CD experience (GitHub Actions, Jenkins) which is mentioned in JD",
-    "Include system design examples — the role emphasizes scalable architecture"
-  ],
-  "match_summary": "John is a strong backend candidate with solid Python fundamentals. While skills and experience align well, adding cloud and DevOps depth would make this application much stronger."
-}
-```
- 
-### Batch Analysis + Ranking
-```json
-POST /analyze/batch
-{
-  "resume_ids": [1, 2, 3],
-  "jd_text": "Senior Python Developer..."
-}
- 
-Response:
-{
-  "total_resumes": 3,
-  "jd_summary": "Senior Python Developer with FastAPI, PostgreSQL, AWS...",
-  "rankings": [
-    { "rank": 1, "candidate_name": "John Doe", "total_score": 76.8 },
-    { "rank": 2, "candidate_name": "Sarah Lee", "total_score": 71.2 },
-    { "rank": 3, "candidate_name": "Mike Ray", "total_score": 58.4 }
-  ]
-}
+GET  /          App info
+GET  /health    Service health (API, DB, Redis, model)
 ```
  
 ---
@@ -192,76 +157,141 @@ Response:
 ## 🧠 Scoring Algorithm
  
 ```
-Final Section Score = 0.4 × (Embedding Cosine Similarity) 
-                    + 0.6 × (Claude LLM Score)
+Per Section (Skills / Experience / Education):
+  score = 0.4 × embedding_cosine_similarity(section, JD)
+        + 0.6 × claude_llm_score(section, JD)
  
-Total Score = 0.40 × Skills Score
-            + 0.35 × Experience Score
-            + 0.25 × Education Score
+Total Score:
+  total = 0.40 × skills_score
+        + 0.35 × experience_score
+        + 0.25 × education_score
 ```
  
+**Score labels:**
+- 🟢 **Strong Match** — ≥ 70
+- 🟡 **Moderate Match** — 45–69
+- 🔴 **Weak Match** — < 45
 ---
  
-## ⚡ Caching Strategy
+## 📊 Sample Output
  
+```json
+{
+  "candidate_name": "John Doe",
+  "resume_filename": "john_doe.pdf",
+  "skills_score": 85.4,
+  "experience_score": 72.1,
+  "education_score": 68.0,
+  "total_score": 76.8,
+  "strengths": [
+    "5 years of Python directly matches the 4+ year requirement",
+    "FastAPI and PostgreSQL align perfectly with the backend stack",
+    "Docker experience covers the containerization requirement"
+  ],
+  "improvements": [
+    "Add AWS certification — JD specifically requires cloud experience",
+    "Highlight CI/CD work (GitHub Actions, Jenkins) mentioned in JD",
+    "Include system design examples for the scalability requirement"
+  ],
+  "match_summary": "John is a strong backend candidate with solid Python fundamentals..."
+}
 ```
-cache_key = SHA-256(resume_text + jd_text)
  
-Request → Check Redis
-  ├── HIT  → Return cached result instantly (< 10ms)
-  └── MISS → Run full AI pipeline (~5-15s) → Store in Redis (TTL: 1hr)
-```
- 
----
- 
-## 🔍 RAG (Bonus)
- 
-When ChromaDB is available:
-1. Resumes are chunked (500 words, 50-word overlap) and indexed on upload
-2. During analysis, relevant chunks are retrieved by querying with JD text
-3. Retrieved context augments the Claude scoring prompts for better accuracy
 ---
  
 ## 📁 Project Structure
  
 ```
-backend/
-├── main.py              # FastAPI app, middleware, lifespan
-├── config.py            # Settings via pydantic-settings
-├── routers/
-│   ├── auth.py          # /auth endpoints
-│   ├── resume.py        # /resume endpoints  
-│   └── analyze.py       # /analyze endpoints
-├── services/
-│   ├── parser.py        # PDF/DOCX text extraction
-│   ├── extractor.py     # Claude structured extraction
-│   ├── embedder.py      # sentence-transformers embeddings
-│   ├── scorer.py        # Hybrid section scoring
-│   ├── ranker.py        # Multi-resume ranking
-│   ├── feedback.py      # Claude feedback generation
-│   └── rag.py           # ChromaDB RAG (bonus)
-├── models/              # SQLAlchemy ORM models
-├── schemas/             # Pydantic request/response schemas
-├── utils/
-│   ├── jwt.py           # JWT create/verify
-│   ├── cache.py         # Redis helpers
-│   └── logger.py        # Loguru setup
-└── db/
-    └── database.py      # Connection + session
+ai-resume-analyzer/
+│
+├── .github/
+│   ├── workflows/
+│   │   ├── ci.yml          # Test + build on every PR
+│   │   ├── cd.yml          # Docker push + release on main
+│   │   └── security.yml    # Dependency audit + secret scan
+│   ├── ISSUE_TEMPLATE/
+│   └── PULL_REQUEST_TEMPLATE/
+│
+├── backend/                 # FastAPI Python app
+│   ├── main.py
+│   ├── config.py
+│   ├── routers/             # auth · resume · analyze
+│   ├── services/            # parser · extractor · embedder · scorer · ranker · feedback · rag
+│   ├── models/              # SQLAlchemy ORM
+│   ├── schemas/             # Pydantic request/response
+│   ├── utils/               # jwt · cache · logger
+│   ├── db/                  # database connection
+│   ├── tests/               # pytest test suite
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   └── .env.example
+│
+├── frontend/                # React + Vite + Tailwind app
+│   ├── src/
+│   │   ├── App.jsx
+│   │   ├── pages/           # AuthPage · Dashboard · Rankings · History
+│   │   ├── components/      # UI · Navbar · DropZone · ResultCard · Charts · Toast
+│   │   ├── context/         # AuthContext
+│   │   └── services/        # api.js (Axios)
+│   ├── Dockerfile
+│   ├── nginx.conf
+│   ├── package.json
+│   └── .env.example
+│
+├── docker-compose.yml       # api · db · redis · frontend
+├── README.md
+├── CONTRIBUTING.md
+└── LICENSE
 ```
  
 ---
  
-## ⚠️ Assumptions & Limitations
+## 🧪 Running Tests
  
-- Scanned/image-based PDFs are not supported (no OCR)
-- Maximum 10 resumes per batch upload
-- Claude model must be `claude-sonnet-4-20250514` or newer
-- Embedding model (`all-MiniLM-L6-v2`) downloads ~90MB on first run
-- Redis is optional; if unavailable, caching is silently disabled
-- RAG (ChromaDB) is a bonus feature and optional
+```bash
+cd backend
+ 
+# Run all tests
+pytest
+ 
+# With coverage report
+pytest --cov=. --cov-report=html
+open htmlcov/index.html
+```
+ 
 ---
  
-## 📝 License
+## ⚡ Performance Notes
  
-MIT
+- **Caching:** Identical (resume + JD) pairs are cached in Redis — subsequent calls return in < 10ms
+- **Batch processing:** Up to 10 resumes analyzed sequentially with shared JD embedding
+- **Embedding model:** `all-MiniLM-L6-v2` loaded once at startup, ~90MB download on first run
+- **RAG indexing:** Chunked at upload time, does not slow down analysis
+---
+ 
+## ⚠️ Assumptions & Limitations
+ 
+- Scanned / image-only PDFs are not supported (no OCR)
+- Maximum 10 resumes per batch upload
+- Anthropic API key required — Claude handles extraction, scoring, feedback
+- Redis is optional; caching is silently disabled if unavailable
+- ChromaDB RAG is a bonus feature and optional
+- Embedding model downloads ~90MB on first startup
+---
+ 
+## 🤝 Contributing
+ 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, branch strategy, commit conventions, and test guidelines.
+ 
+---
+ 
+## 📄 License
+ 
+[MIT](LICENSE) — free to use, modify, and distribute.
+ 
+---
+ 
+<div align="center">
+Built with ❤️ using <strong>FastAPI</strong>, <strong>React</strong>, and <strong>Claude AI</strong>
+</div>
+ 

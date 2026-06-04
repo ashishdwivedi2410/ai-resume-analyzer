@@ -67,4 +67,3 @@ def delete_cached_result(key: str) -> bool:
     except Exception as e:
         app_logger.error(f"Cache DELETE error: {e}")
         return False
-        

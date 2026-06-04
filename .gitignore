@@ -1,0 +1,103 @@
+# ─────────────────────────────────────────────
+#  AI Resume Analyzer — .gitignore
+# ─────────────────────────────────────────────
+
+# ── Python / Backend ──────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+.eggs/
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env.local
+
+# Pytest / coverage
+.pytest_cache/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+nosetests.xml
+pytest.xml
+
+# MyPy / type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# ── Node / Frontend ───────────────────────────
+node_modules/
+frontend/dist/
+frontend/.cache/
+frontend/build/
+
+# ── Environment Variables ─────────────────────
+.env
+backend/.env
+frontend/.env
+*.env.local
+*.env.*.local
+
+# ── IDE / Editor ──────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*.orig
+.DS_Store
+Thumbs.db
+
+# ── Docker ────────────────────────────────────
+*.dockerignore
+
+# ── Logs ──────────────────────────────────────
+logs/
+*.log
+*.log.*
+
+# ── Database / Storage ────────────────────────
+*.sqlite
+*.sqlite3
+*.db
+postgres_data/
+
+# ── Uploads ───────────────────────────────────
+backend/uploads/
+uploads/
+
+# ── ChromaDB ──────────────────────────────────
+chroma_db/
+backend/chroma_db/
+
+# ── Secrets / Keys ────────────────────────────
+*.pem
+*.key
+*.crt
+*.p12
+secrets/
+
+# ── OS ────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+Desktop.ini
