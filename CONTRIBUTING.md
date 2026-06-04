@@ -34,7 +34,7 @@ Be respectful, constructive, and inclusive. See `CODE_OF_CONDUCT.md`.
 
 ```bash
 # 1. Fork and clone
-git clone https://github.com/YOUR_USERNAME/ai-resume-analyzer.git
+git clone https://github.com/ashishdwivedi2410/ai-resume-analyzer
 cd ai-resume-analyzer
 
 # 2. Backend setup
