@@ -64,7 +64,7 @@ AI Resume Analyzer evaluates resumes against job descriptions using a hybrid of 
 ### Option 1 — Docker (Recommended)
  
 ```bash
-git clone [https://github.com/YOUR_USERNAME/ai-resume-analyzer.git](https://github.com/ashishdwivedi2410/ai-resume-analyzer)
+git clone https://github.com/YOUR_USERNAME/ai-resume-analyzer.git
 cd ai-resume-analyzer
  
 # Configure environment
